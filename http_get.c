@@ -35,6 +35,8 @@ static enum State state = INIT;
 static TickType_t currentStartTime = 0;
 static TickType_t stopTime = 0;
 static int billingInProgress = 0;
+const int gpio = 1;
+
 
 void enableDevice() {
 	//to implement
@@ -63,6 +65,7 @@ int handleCommand(char * command, char * response) {
         }
         sprintf(response, "device started\n");
         state = START;
+        gpio_write(gpio, 1);
     }
     else if (strcmp("stop", command) == 0) {
         if(state == START){
@@ -71,6 +74,7 @@ int handleCommand(char * command, char * response) {
         }
         sprintf(response, "device stopped\n");
         state = STOP;
+        gpio_write(gpio, 0);
     }
     else if (strcmp("bill", command) == 0) {
         if (!currentStartTime) {
@@ -198,6 +202,8 @@ void user_init(void)
     sdk_wifi_set_opmode(STATION_MODE);
     sdk_wifi_station_set_config(&config);
 
+    gpio_enable(gpio, GPIO_OUTPUT);
+    
     xTaskCreate(&listen_task, "listen_task", 384, NULL, 2, NULL);
 }
 
